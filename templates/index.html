@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Text to Speech Messenger</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #f5f7fa, #c3cfe2);
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            height: 100vh;
+        }
+
+        h1 {
+            color: #4a90e2;
+            margin-bottom: 20px;
+            font-size: 2em;
+            text-align: center;
+            text-shadow: 1px 1px 5px rgba(255, 255, 255, 0.7);
+        }
+
+        .chat-container {
+            width: 100%; /* Use full width */
+            max-width: 600px; /* Maximum width for larger screens */
+            border-radius: 10px;
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.2);
+            background-color: #ffffff;
+            display: flex;
+            flex-direction: column;
+            height: 80vh; /* Adjust height for better visibility */
+            overflow: hidden;
+        }
+
+        .messages {
+            flex: 1;
+            padding: 20px;
+            overflow-y: auto;
+            background-color: #f0f2f5;
+            display: flex;
+            flex-direction: column;
+            gap: 10px; /* Add space between messages */
+        }
+
+        .message {
+            padding: 12px 15px;
+            border-radius: 20px;
+            display: inline-block;
+            max-width: 75%;
+            position: relative;
+            line-height: 1.5;
+            word-wrap: break-word;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            transition: background-color 0.2s;
+        }
+
+        .user-message {
+            background-color: #0084ff; /* Messenger blue */
+            color: white;
+            align-self: flex-end;
+            text-align: right;
+            border-bottom-right-radius: 0;
+            border-top-right-radius: 0;
+        }
+
+        .server-message {
+            background-color: #e0e0e0;
+            color: black;
+            align-self: flex-start;
+            text-align: left;
+            border-bottom-left-radius: 0;
+            border-top-left-radius: 0;
+        }
+
+        .timestamp {
+            font-size: 0.75em;
+            color: #888;
+            position: absolute;
+            bottom: -20px;
+            right: 10px;
+        }
+
+        form {
+            display: flex;
+            padding: 10px;
+            background-color: #ffffff;
+            border-top: 1px solid #ccc;
+        }
+
+        input[type="text"] {
+            flex: 1;
+            padding: 12px;
+            border: 1px solid #ccc;
+            border-radius: 20px;
+            font-size: 1em;
+            margin-right: 10px;
+            outline: none;
+            transition: border-color 0.3s;
+            background-color: #f1f1f1;
+        }
+
+        input[type="text"]:focus {
+            border-color: #0084ff; /* Change focus color to Messenger blue */
+            background-color: #ffffff;
+        }
+
+        button {
+            background-color: #0084ff; /* Messenger blue */
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 1em;
+            transition: background-color 0.3s, transform 0.2s;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+
+        button:hover {
+            background-color: #0073e6; /* Darker shade of blue on hover */
+            transform: translateY(-2px); /* Slight lift on hover */
+        }
+
+        .typing-indicator {
+            font-size: 0.9em;
+            color: #888;
+            align-self: flex-start;
+            margin-left: 10px;
+            display: none; /* Hide initially */
+            padding: 5px;
+            border-radius: 10px;
+            background-color: rgba(255, 255, 255, 0.9);
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+        }
+
+        audio {
+            display: none; /* Hide audio element */
+        }
+
+        .audio-link {
+            color: #0084ff;
+            text-decoration: none;
+            display: inline-block;
+            margin-top: 5px;
+            font-size: 0.9em;
+            transition: color 0.2s;
+        }
+
+        .audio-link:hover {
+            color: #005bb5; /* Darker blue on hover */
+        }
+
+        @media (max-width: 480px) {
+            h1 {
+                font-size: 1.5em; /* Reduce font size on smaller screens */
+            }
+
+            .chat-container {
+                height: 70vh; /* Adjust height for smaller screens */
+            }
+
+            .message {
+                max-width: 90%; /* Make messages wider on smaller screens */
+            }
+        }
+    </style>
+</head>
+<body>
+    <h1>Text to Speech Messenger</h1>
+    <div class="chat-container">
+        <div class="messages" id="messages"></div>
+        <div class="typing-indicator" id="typing-indicator">Server is typing...</div>
+        <form id="speech-form">
+            <input type="text" id="text" name="text" placeholder="Type your message..." required>
+            <button type="submit">Send</button>
+        </form>
+    </div>
+
+    <audio id="audio-player" controls></audio>
+
+    <script>
+        document.getElementById('speech-form').addEventListener('submit', async function(event) {
+            event.preventDefault();
+
+            // Get the text from the form input
+            const textInput = document.getElementById('text').value;
+
+            // Add user message to chat with timestamp
+            addMessage(textInput, 'user');
+
+            // Show typing indicator
+            const typingIndicator = document.getElementById('typing-indicator');
+            typingIndicator.style.display = 'block';
+
+            // Create a FormData object to send the text to the server
+            const formData = new FormData();
+            formData.append('text', textInput);
+
+            // Send the form data to the Flask backend
+            const response = await fetch('/synthesize', {
+                method: 'POST',
+                body: formData
+            });
+
+            // Hide typing indicator after server responds
+            typingIndicator.style.display = 'none';
+
+            // Check if the response is OK
+            if (response.ok) {
+                const jsonResponse = await response.json();
+                if (jsonResponse.status === "success") {
+                    // Add server message as audio memo with timestamp
+                    addAudioMemo(jsonResponse.audio_url);
+
+                    // Set the audio source to the returned audio URL and play it
+                    const audioPlayer = document.getElementById('audio-player');
+                    audioPlayer.src = `/audio/${jsonResponse.audio_url}`;
+                    audioPlayer.play();
+                } else {
+                    alert('Error generating speech: ' + jsonResponse.message);
+                }
+            } else {
+                alert('Error with the request!');
+            }
+
+            // Clear the input field
+            document.getElementById('text').value = '';
+        });
+
+        function addMessage(text, sender) {
+            const messagesContainer = document.getElementById('messages');
+            const messageDiv = document.createElement('div');
+            messageDiv.classList.add('message', sender === 'user' ? 'user-message' : 'server-message');
+            messageDiv.textContent = text;
+
+            // Add timestamp
+            const timestampDiv = document.createElement('span');
+            timestampDiv.classList.add('timestamp');
+            timestampDiv.textContent = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+            messageDiv.appendChild(timestampDiv);
+
+            messagesContainer.appendChild(messageDiv);
+            messagesContainer.scrollTop = messagesContainer.scrollHeight; // Scroll to the bottom
+        }
+
+        function addAudioMemo(audioUrl) {
+            const messagesContainer = document.getElementById('messages');
+            const messageDiv = document.createElement('div');
+            messageDiv.classList.add('message', 'server-message');
+
+            // Create a link to play the audio
+            const audioLink = document.createElement('a');
+            audioLink.href = `/audio/${audioUrl}`;
+            audioLink.classList.add('audio-link');
+            audioLink.textContent = 'Voice Memo (Click to play)';
+            audioLink.target = '_blank'; // Open in new tab
+            audioLink.onclick = function() {
+                const audioPlayer = document.getElementById('audio-player');
+                audioPlayer.src = audioLink.href; // Set the audio player source
+                audioPlayer.play(); // Play the audio
+                return false; // Prevent default link behavior
+            };
+
+            // Add the audio link to the message div
+            messageDiv.appendChild(audioLink);
+
+            // Add timestamp
+            const timestampDiv = document.createElement('span');
+            timestampDiv.classList.add('timestamp');
+            timestampDiv.textContent = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+            messageDiv.appendChild(timestampDiv);
+
+            messagesContainer.appendChild(messageDiv);
+            messagesContainer.scrollTop = messagesContainer.scrollHeight; // Scroll to the bottom
+        }
+    </script>
+</body>
+</html>

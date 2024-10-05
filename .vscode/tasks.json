@@ -1,0 +1,19 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "Run Flask",
+            "type": "shell",
+            "command": "python -m flask run",
+            "args": [
+                "--no-debugger"
+            ],
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            },
+            "problemMatcher": [],
+            "detail": "This task runs the Flask application."
+        }
+    ]
+}
