@@ -32,6 +32,9 @@ jobs:
         username: ${{ secrets.VM_USER }}
         key: ${{ secrets.VM_SSH_PRIVATE_KEY }}
         script: |
+          # Change ownership of the repository
+          sudo chown -R tranpham:tranpham /home/tranpham/Text2Speech
+          
           # Add the directory to the safe directory list to avoid the dubious ownership error
           git config --global --add safe.directory /home/tranpham/Text2Speech
           cd /home/tranpham/Text2Speech
@@ -39,7 +42,7 @@ jobs:
           # Create a virtual environment on the VM if not already created
           python3 -m venv venv || echo "Virtual environment already exists"
           # Activate the virtual environment and install dependencies
-          source venv/bin/activate
+          . venv/bin/activate
           pip install -r requirements.txt
           FLASK_APP=app.py flask run --host=0.0.0.0 --port=5000
           # Restart your service or execute necessary commands here
