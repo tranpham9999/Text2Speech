@@ -32,7 +32,6 @@ jobs:
         username: ${{ secrets.VM_USER }}
         key: ${{ secrets.VM_SSH_PRIVATE_KEY }}
         script: |
-          # Change to the correct directory
           cd /home/tranpham/Text2Speech || exit
 
           # Pull the latest changes from the repository
@@ -40,9 +39,9 @@ jobs:
           
           # Ensure the virtual environment is created
           python3 -m venv venv || echo "Virtual environment already exists"
-          
+
           # Activate the virtual environment and install dependencies
-          . venv/bin/activate
+          source venv/bin/activate
           pip install -r requirements.txt
           
           # Run the Flask application
