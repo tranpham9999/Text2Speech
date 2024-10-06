@@ -33,5 +33,6 @@ jobs:
           cd /home/tranpham/Text2Speech
           git pull origin main
           pip install -r requirements.txt
+          pip freeze > requirements.txt
           # Restart your service or execute necessary commands here
           # e.g., sudo systemctl restart your-app-service
