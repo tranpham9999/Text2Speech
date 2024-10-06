@@ -3,7 +3,7 @@ name: Deploy to Azure VM
 on:
   push:
     branches:
-      - main  # Change to the branch you want to trigger the deployment
+      - master  # Change to the branch you want to trigger the deployment
 
 jobs:
   build:
