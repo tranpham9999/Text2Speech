@@ -33,7 +33,7 @@ jobs:
         key: ${{ secrets.VM_SSH_PRIVATE_KEY }}
         script: |
           # Change ownership of the repository
-          sudo chown -R tranpham:tranpham /home/tranpham/Text2Speech
+          #sudo chown -R tranpham:tranpham /home/tranpham/Text2Speech
           
           # Add the directory to the safe directory list to avoid the dubious ownership error
           git config --global --add safe.directory /home/tranpham/Text2Speech
