@@ -3,10 +3,10 @@ name: Deploy to Azure VM
 on:
   push:
     branches:
-      - master  # Change this to the branch that should trigger the deployment
+      - master  # Change to the branch you want to trigger the deployment
 
 jobs:
-  deploy:
+  build:
     runs-on: ubuntu-latest
 
     steps:
@@ -16,36 +16,34 @@ jobs:
     - name: Set up Python
       uses: actions/setup-python@v2
       with:
-        python-version: '3.x'  # Adjust this based on your Python version
+        python-version: '3.x'  # Adjust based on your Python version
 
-    - name: Install dependencies locally
+    - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
-        python -m venv venv  # Create a virtual environment locally
-        ./venv/bin/pip install -r requirements.txt  # Ensure this file exists in your repo
+        python -m venv venv  # Create a virtual environment
+        # Install dependencies in the virtual environment
+        ./venv/bin/pip install -r requirements.txt  # Make sure this exists in your repo
 
     - name: SSH into Azure VM and deploy
       uses: appleboy/ssh-action@v0.1.6
       with:
-        host: ${{ secrets.VM_HOST }}           # Set up VM_HOST in GitHub secrets
-        username: ${{ secrets.VM_USER }}       # Set up VM_USER in GitHub secrets
-        key: ${{ secrets.VM_SSH_PRIVATE_KEY }} # Add your private SSH key in GitHub secrets
+        host: ${{ secrets.VM_HOST }}
+        username: ${{ secrets.VM_USER }}
+        key: ${{ secrets.VM_SSH_PRIVATE_KEY }}
         script: |
-          # Navigate to the application folder on the VM
+          # Change ownership of the repository
+          sudo chown -R tranpham:tranpham /home/tranpham/Text2Speech
+          
+          # Add the directory to the safe directory list to avoid the dubious ownership error
+          git config --global --add safe.directory /home/tranpham/Text2Speech
           cd /home/tranpham/Text2Speech
-          
-          # Pull the latest code from the repository
           git pull origin master
-          
-          # Create a virtual environment if it doesn't already exist
+          # Create a virtual environment on the VM if not already created
           python3 -m venv venv || echo "Virtual environment already exists"
-          
           # Activate the virtual environment and install dependencies
-          source venv/bin/activate
+          . venv/bin/activate
           pip install -r requirements.txt
-          
-          # Run the Flask app (you might want to handle running it as a service instead)
           FLASK_APP=app.py flask run --host=0.0.0.0 --port=5000
-          
-          # (Optional) Restart a service if you're running the app as a service
-          # sudo systemctl restart your-flask-app.service
+          # Restart your service or execute necessary commands here
+          # e.g., sudo systemctl restart your-app-service
