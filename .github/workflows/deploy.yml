@@ -44,6 +44,7 @@ jobs:
           # Activate the virtual environment and install dependencies
           . venv/bin/activate
           pip install -r requirements.txt
+          pip install azure-cognitiveservices-speech==1.40.0
           FLASK_APP=app.py flask run --host=0.0.0.0 --port=5000
           # Restart your service or execute necessary commands here
           # e.g., sudo systemctl restart your-app-service
