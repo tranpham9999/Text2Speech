@@ -1,5 +1,4 @@
 import os
-import re
 from flask import Flask, render_template, request, jsonify, send_file
 import azure.cognitiveservices.speech as speechsdk
 import tempfile
@@ -21,9 +20,6 @@ os.makedirs(AUDIO_DIR, exist_ok=True)
 def home():
     return render_template('index.html')
 
-def sanitize_filename(text):
-    return re.sub(r'[^\w\s-]', '_', text).strip().lower()
-
 @app.route('/synthesize', methods=['POST'])
 def synthesize():
     text = request.form['text']  # Get the text from the form
@@ -35,12 +31,11 @@ def synthesize():
     speech_config.set_speech_synthesis_output_format(OUTPUT_FORMAT)
 
     # Create a temporary file in the specified directory
-    audio_filename = f"{sanitize_filename(text[:10])}_{os.urandom(4).hex()}.mp3"  # Generate a unique filename based on text
+    audio_filename = f"{text[:10]}_{os.urandom(4).hex()}.mp3"  # Generate a unique filename based on text
     temp_file_path = os.path.join(AUDIO_DIR, audio_filename)
     print(f"Audio file will be saved to: {temp_file_path}")
 
     audio_output = speechsdk.audio.AudioOutputConfig(filename=temp_file_path)
-    
     # Create a speech synthesizer
     synthesizer = speechsdk.SpeechSynthesizer(speech_config=speech_config, audio_config=audio_output)
 
@@ -51,7 +46,7 @@ def synthesize():
         return jsonify({"status": "error", "message": str(e)})
 
     if result.reason == speechsdk.ResultReason.SynthesizingAudioCompleted:
-        return jsonify({"status": "success", "audio_url": f"/audio/{audio_filename}"})  # Return URL to audio file
+        return jsonify({"status": "success", "audio_url":f"/{audio_filename}"})  # Return URL to audio file
     else:
         print(f"Synthesis failed: {result.reason}")
         return jsonify({"status": "error", "message": result.reason})
@@ -59,6 +54,5 @@ def synthesize():
 @app.route('/audio/<path:filename>', methods=['GET'])
 def play_audio(filename):
     return send_file(os.path.join(AUDIO_DIR, filename))
-
 if __name__ == '__main__':
     app.run(debug=True)
