@@ -31,7 +31,7 @@ jobs:
         key: ${{ secrets.VM_SSH_PRIVATE_KEY }}
         script: |
           cd /home/tranpham/Text2Speech
-          git pull origin main
+          git pull origin master
           pip install -r requirements.txt
           pip freeze > requirements.txt
           FLASK_APP=app.py flask run --host=0.0.0.0 --port=5000
