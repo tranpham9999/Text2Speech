@@ -22,7 +22,7 @@ class User(UserMixin):
 
 # Hardcoded user (in a real app, use a database)
 users = {
-    '1': User('1', 'admin', generate_password_hash('password123'))  # Username: admin, Password: password123
+    '1': User('1', 'admin', generate_password_hash('admin'))  # Username: admin, Password: password123
 }
 
 # Azure Speech API credentials
