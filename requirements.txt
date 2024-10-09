@@ -1,4 +1,4 @@
 Flask==2.3.2
-flask-login==0.5.0
+flask-login==0.6.2
 azure-cognitiveservices-speech==1.40.0
 gunicorn==20.1.0
