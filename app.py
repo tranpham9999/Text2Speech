@@ -76,7 +76,7 @@ def synthesize():
         return jsonify({"status": "error", "message": str(e)})
 
     if result.reason == speechsdk.ResultReason.SynthesizingAudioCompleted:
-        return jsonify({"status": "success", "audio_url":f"/audio/{audio_filename}"})  # Return URL to audio file
+        return jsonify({"status": "success", "audio_url":f"/{audio_filename}"})  # Return URL to audio file
     else:
         print(f"Synthesis failed: {result.reason}")
         return jsonify({"status": "error", "message": result.reason})
