@@ -6,10 +6,10 @@ import tempfile
 app = Flask(__name__)
 
 # Azure Speech API credentials
-SPEECH_KEY = 'df6e49cb8a80431886c95fc93b5c4be2'
-SPEECH_REGION = 'southeastasia'
-ENDPOINT_ID = 'bb4fe2ad-2866-42f5-9205-769f5349a4e3'
-VOICE_NAME = "Haindh Voice DemoNeural"
+SPEECH_KEY = os.getenv('SPEECH_KEY')
+SPEECH_REGION = os.getenv('SPEECH_REGION')
+ENDPOINT_ID = os.getenv('ENDPOINT_ID')
+VOICE_NAME = os.getenv('VOICE_NAME')
 OUTPUT_FORMAT = speechsdk.SpeechSynthesisOutputFormat.Audio16Khz32KBitRateMonoMp3
 
 # Directory to store audio files
