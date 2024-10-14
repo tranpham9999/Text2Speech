@@ -1,7 +1,11 @@
 import os
 from flask import Flask, render_template, request, jsonify, redirect, url_for, session, send_file
 import azure.cognitiveservices.speech as speechsdk
+from dotenv import load_dotenv  # New import for loading .env
 import tempfile
+
+# Load environment variables from .env for local development
+load_dotenv()
 
 app = Flask(__name__)
 app.secret_key = os.getenv('SECRET_KEY', 'mysecretkey')  # Secret key for session management
@@ -14,7 +18,8 @@ VOICE_NAME = os.getenv('VOICE_NAME')
 OUTPUT_FORMAT = speechsdk.SpeechSynthesisOutputFormat.Audio16Khz32KBitRateMonoMp3
 
 # Directory to store audio files
-AUDIO_DIR = '/home/tranpham/WebAiText2Speech/audio_files'
+AUDIO_DIR = os.getenv('AUDIO_DIR', '/home/tranpham/WebAiText2Speech/audio_files')
+
 os.makedirs(AUDIO_DIR, exist_ok=True)
 
 # Dummy credentials for login (replace with a more secure system in production)
