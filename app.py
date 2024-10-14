@@ -17,6 +17,7 @@ OUTPUT_FORMAT = speechsdk.SpeechSynthesisOutputFormat.Audio16Khz32KBitRateMonoMp
 AUDIO_DIR = '/home/tranpham/WebAiText2Speech/audio_files'
 os.makedirs(AUDIO_DIR, exist_ok=True)
 
+
 # Dummy credentials for login (replace with a more secure system in production)
 USER_CREDENTIALS = {
     'admin': 'password123'
